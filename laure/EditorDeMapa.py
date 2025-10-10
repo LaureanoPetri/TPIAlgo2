@@ -9,7 +9,7 @@ ANCHO, ALTO = 1200, 800
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Editor de caminos")
 
-fondo = pygame.image.load("mapaDeJuego.png").convert()
+fondo = pygame.image.load("ImagenesJuego/mapaDeJuego.png").convert()
 fondo = pygame.transform.scale(fondo, (ANCHO, ALTO))
 
 # ⚙️ Datos del grafo
@@ -23,8 +23,8 @@ grafo = {}
 nodo_id = 0
 
 # 🔄 Intentar cargar grafo guardado
-if os.path.exists("grafo.json"):
-    with open("grafo.json") as f:
+if os.path.exists("laure/grafo.json"):
+    with open("laure/grafo.json") as f:
         datos = json.load(f)
         posiciones = {k: tuple(v) for k, v in datos["posiciones"].items()}
         grafo = datos["grafo"]
@@ -69,7 +69,7 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
-                with open("grafo.json", "w") as f:
+                with open("laure/grafo.json", "w") as f:
                     json.dump({"posiciones": posiciones, "grafo": grafo}, f)
                 print("✅ Grafo guardado con tecla S")
 
@@ -124,7 +124,7 @@ while running:
 
 # Guardar grafo como JSON (crea o actualiza)
 try:
-    with open("grafo.json", "w") as f:
+    with open("laure/grafo.json", "w") as f:
         json.dump({
             "posiciones": {k: list(v) for k, v in posiciones.items()},
             "grafo": grafo

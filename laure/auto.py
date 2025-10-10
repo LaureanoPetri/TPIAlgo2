@@ -1,19 +1,21 @@
 import pygame
 import math
+import os
 
 class Auto:
-    def __init__(self, nodo_inicio, posiciones, grafo, personas, imagen_path="autoImagen.png", escala=(32, 32)):
+    def __init__(self, nodo_inicio, posiciones, grafo, personas, imagen_path="ImagenesJuego/autoImagen.png", escala=(32, 32)):
         self.nodo_actual = nodo_inicio
         self.pos = list(posiciones[nodo_inicio])
         self.destino = None
         self.velocidad = 2
         self.posiciones = posiciones
         self.grafo = grafo
-        self.personas = personas  # ✅ ahora la clase tiene su propia copia
+        self.personas = personas
         self.angulo = 0
 
-        # Cargar imagen del auto
-        self.imagen_original = pygame.image.load(imagen_path).convert_alpha()
+        # ✅ Ruta absoluta basada en la ubicación del archivo auto.py
+        ruta_completa_imagen = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", imagen_path))
+        self.imagen_original = pygame.image.load(ruta_completa_imagen).convert_alpha()
         self.imagen = pygame.transform.scale(self.imagen_original, escala)
         self.rect = self.imagen.get_rect(center=self.pos)
 

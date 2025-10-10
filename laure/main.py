@@ -2,7 +2,7 @@ import pygame
 import sys
 import os
 import json
-from laure.auto import*
+from auto import*
 
 # Inicializar Pygame
 pygame.init()
@@ -20,11 +20,11 @@ pygame.display.set_caption("Proyecto Pygame - Laureano")
 # Controlador de FPS
 clock = pygame.time.Clock()
 # Cargar imagen de fondo
-fondo = pygame.image.load("mapaDeJuego.png").convert()
+fondo = pygame.image.load("ImagenesJuego/mapaDeJuego.png").convert()
 fondo = pygame.transform.scale(fondo, (ANCHO, ALTO))  # Escala al tamaño de la ventana
 # 🔄 Intentar cargar grafo guardado
-if os.path.exists("grafo.json"):
-    with open("grafo.json") as f:
+if os.path.exists("laure/grafo.json"):
+    with open("laure/grafo.json") as f:
         datos = json.load(f)
         posiciones = {k: tuple(v) for k, v in datos["posiciones"].items()}
         grafo = datos["grafo"]
