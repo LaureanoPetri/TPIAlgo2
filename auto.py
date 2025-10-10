@@ -2,14 +2,15 @@ import pygame
 import math
 
 class Auto:
-    def __init__(self, nodo_inicio, posiciones, grafo, imagen_path="autoImagen.png", escala=(32, 32)):
+    def __init__(self, nodo_inicio, posiciones, grafo, personas, imagen_path="autoImagen.png", escala=(32, 32)):
         self.nodo_actual = nodo_inicio
-        self.pos = list(posiciones[nodo_inicio])  # posición actual (x, y)
+        self.pos = list(posiciones[nodo_inicio])
         self.destino = None
         self.velocidad = 2
         self.posiciones = posiciones
         self.grafo = grafo
-        self.angulo = 0  # Ángulo de rotación en grados
+        self.personas = personas  # ✅ ahora la clase tiene su propia copia
+        self.angulo = 0
 
         # Cargar imagen del auto
         self.imagen_original = pygame.image.load(imagen_path).convert_alpha()
@@ -71,6 +72,10 @@ class Auto:
                 # Ajustamos porque la imagen apunta hacia arriba, no a la derecha
                 self.angulo = angulo_grados - 90  
 
+            if self.nodo_actual in self.personas and not self.personas[self.nodo_actual]["rescatada"]:
+                print(f"🚨 Persona rescatada en nodo {self.nodo_actual}")
+                self.personas[self.nodo_actual]["rescatada"] = True
+
             if distancia < self.velocidad:
                 self.pos = list(objetivo)
                 self.nodo_actual = self.destino
@@ -85,3 +90,8 @@ class Auto:
         imagen_rotada = pygame.transform.rotate(self.imagen, self.angulo)
         rect_rotado = imagen_rotada.get_rect(center=self.rect.center)
         pantalla.blit(imagen_rotada, rect_rotado)
+
+        for nodo, datos in self.personas.items():
+            if not datos["rescatada"]:
+                pos = self.posiciones[nodo]
+                pygame.draw.circle(pantalla, (255, 255, 0), pos, 6)

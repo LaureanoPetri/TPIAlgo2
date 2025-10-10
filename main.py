@@ -3,14 +3,17 @@ import sys
 import os
 import json
 from auto import*
+
 # Inicializar Pygame
 pygame.init()
+
 # --- Configuración general ---
 ANCHO, ALTO = 1200, 800
 FPS = 60
 COLOR_FONDO = (20, 20, 30)
 COLOR_JUGADOR = (100, 200, 255)
 VELOCIDAD = 5
+
 # Crear ventana
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Proyecto Pygame - Laureano")
@@ -30,7 +33,17 @@ if os.path.exists("grafo.json"):
 else:
     print("No se encontró grafo.json, empezando desde cero.")
 
-auto = Auto(nodo_inicio="3", posiciones=posiciones, grafo=grafo)
+base_roja = ["71", "72", "73"]
+base_azul = ["220", "221", "219"]
+
+import random
+# 💡 Crear 10 personas en nodos aleatorios no repetidos
+nodos_disponibles = list(posiciones.keys())
+personas = {}
+for nodo in random.sample(nodos_disponibles, 10):
+    personas[nodo] = {"rescatada": False}
+# Crear el auto DESPUÉS de generar personas
+auto = Auto(nodo_inicio="73", posiciones=posiciones, grafo=grafo, personas=personas)
 
 # --- Bucle principal del juego ---
 running = True
@@ -39,7 +52,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # ✅ Esto tiene que estar dentro del loop de eventos
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
                 auto.mover_por_direccion("derecha")
@@ -49,13 +61,27 @@ while running:
                 auto.mover_por_direccion("arriba")
             elif event.key == pygame.K_DOWN:
                 auto.mover_por_direccion("abajo")
+    
 
     auto.update()  # 2️⃣ Lógica de actualización
     # 3️⃣ Renderizado
     pantalla.blit(fondo, (0, 0))  # Dibujar imagen en posición (0, 0)
+    # Dibujar bases
+    for nodo in base_roja:
+        pygame.draw.circle(pantalla, (255, 0, 0), posiciones[nodo], 12)  # base roja
+    for nodo in base_azul:
+        pygame.draw.circle(pantalla, (0, 0, 255), posiciones[nodo], 12)  # base azul
+    # Mostrar personas
+    for nodo, datos in personas.items():
+        if not datos["rescatada"]:
+            pos = posiciones[nodo]
+            pygame.draw.circle(pantalla, (255, 255, 0), pos, 6)  # amarillo = persona
+
     auto.draw(pantalla)
     pygame.display.flip()# 4️⃣ Actualizar pantalla
     clock.tick(FPS)# 5️⃣ Controlar FPS
+
+
 # Salir del juego
 pygame.quit()
 sys.exit()
