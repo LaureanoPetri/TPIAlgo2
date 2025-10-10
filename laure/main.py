@@ -2,7 +2,7 @@ import pygame
 import sys
 import os
 import json
-from auto import*
+from laure.auto import*
 
 # Inicializar Pygame
 pygame.init()
