@@ -47,9 +47,8 @@ class GameEngine:
         self.vehiculos = []
         base_init = next(iter(self.mapa.base_roja), next(iter(self.mapa.nodos.keys())))
         self.vehiculos.append(Auto("auto_1", base_init, self.mapa.nodos))
-        self.vehiculos.append(Moto("moto_1", base_init, self.mapa.nodos))
-        self.vehiculos.append(Jeep("jeep_1", base_init, self.mapa.nodos))
-        self.vehiculos.append(Camion("camion_1", base_init, self.mapa.nodos))
+        #self.vehiculos.append(Moto("moto_1", base_init, self.mapa.nodos))
+        #self.vehiculos.append(Jeep("jeep_1", base_init, self.mapa.nodos))
 
         # Planificar ruta inicial (primer nodo-persona)
         if self.mapa.personas:
@@ -77,6 +76,8 @@ class GameEngine:
                             if v.estado == "activo":
                                 v.planificar_ruta(nodo_click)
                                 break
+                    self.vehiculos[0].planificar_ruta
+                    
 
             self._update()
             self._draw()

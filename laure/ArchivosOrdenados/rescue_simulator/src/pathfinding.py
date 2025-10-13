@@ -1,35 +1,25 @@
 from collections import deque
 
-def find_path(origen, destino, nodos):
-    """
-    nodos: dict[str, Nodo]
-    """
+def find_path(origen, destino, nodos, bloqueados=None):
+    if bloqueados is None:
+        bloqueados = set()
     if origen == destino:
         return [origen]
-
     visitados = set()
     cola = deque([[origen]])
-
     while cola:
         camino = cola.popleft()
         nodo_id = camino[-1]
-        nodo_actual = nodos[nodo_id]
-
-        if nodo_actual.ocupado:
+        if nodo_id in bloqueados:
             continue
-
         if nodo_id == destino:
             return camino
-
         visitados.add(nodo_id)
-
-        for vecino_id in nodo_actual.adyacentes:
-            vecino = nodos[vecino_id]
-            if not vecino.ocupado and vecino_id not in visitados:
+        for vecino_id in nodos[nodo_id].adyacentes:
+            if vecino_id not in bloqueados and vecino_id not in visitados:
                 nuevo_camino = list(camino)
                 nuevo_camino.append(vecino_id)
                 cola.append(nuevo_camino)
-
     return None
 
 
