@@ -9,7 +9,7 @@ ANCHO, ALTO = 1200, 800
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Editor de caminos")
 
-fondo = pygame.image.load("ImagenesJuego/mapaDeJuego.png").convert()
+fondo = pygame.image.load("laure/ImagenesJuego/mapaDeJuego.png").convert()
 fondo = pygame.transform.scale(fondo, (ANCHO, ALTO))
 
 # ⚙️ Datos del grafo

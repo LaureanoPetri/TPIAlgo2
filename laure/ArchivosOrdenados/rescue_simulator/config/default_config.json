@@ -1,0 +1,12 @@
+{
+  "screen_width": 1200,
+  "screen_height": 800,
+  "fps": 60,
+  "map_path": "grafo.json",
+  "background_image": "src/ImagenesJuego/mapaDeJuego.png",
+  "num_minas": 10,
+  "num_recursos": 20,
+  "num_personas": 10,
+  "base_red_nodes": ["71", "72", "73"],
+  "base_blue_nodes": ["219", "220", "221"]
+}
