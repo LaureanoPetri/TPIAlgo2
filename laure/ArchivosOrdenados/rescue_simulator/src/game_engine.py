@@ -11,7 +11,6 @@ from src.visualization import Visualization
 class GameEngine:
     def __init__(self, config: Dict[str, Any] | None = None):
         script_dir = os.path.dirname(os.path.abspath(__file__))  # ruta de src/
-
         if config is None:
             # Config default
             config = {
@@ -22,8 +21,8 @@ class GameEngine:
                 "num_minas": 10,
                 "num_recursos": 20,
                 "num_personas": 10,
-                "base_red_nodes": ["71", "72", "73"],
-                "base_blue_nodes": ["219", "220", "221"]
+                "base_red_nodes": [71, 72, 73],
+                "base_blue_nodes": [219, 220, 221]
             }
         self.config = config
 
@@ -77,7 +76,7 @@ class GameEngine:
                                 v.planificar_ruta(nodo_click)
                                 break
                     self.vehiculos[0].planificar_ruta
-                    
+
 
             self._update()
             self._draw()

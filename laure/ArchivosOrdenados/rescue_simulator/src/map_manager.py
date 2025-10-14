@@ -37,16 +37,19 @@ class MapManager:
         self.config = config
 
         # --- Cargar grafo ---
-        with open(config["map_path"], "r") as f:
+        map_path = config.get("map_path", "grafo.json")
+        with open(map_path, "r", encoding="utf-8") as f:
             data_manager = json.load(f)
+
 
         self.posiciones = data_manager["posiciones"]
         self.grafo = data_manager["grafo"]
 
         # Crear nodos
         self.nodos = {}
-        for id_nodo, pos in self.posiciones.items():
-            adyacentes = self.grafo.get(id_nodo, [])
+        for id_nodo_str, pos in self.posiciones.items():
+            id_nodo = int(id_nodo_str)
+            adyacentes = [int(a) for a in self.grafo.get(id_nodo_str, [])]
             self.nodos[id_nodo] = Nodo(id_nodo, pos, adyacentes)
 
         # --- Fondo ---
@@ -64,6 +67,7 @@ class MapManager:
         # --- Bases ---
         self.base_roja = config["base_red_nodes"]
         self.base_azul = config["base_blue_nodes"]
+
         for nodo_id in self.base_roja:
             if nodo_id in self.nodos:
                 self.nodos[nodo_id].tipo = "base_roja"
@@ -76,7 +80,7 @@ class MapManager:
     # =====================================================
     def generar_minas(self, cantidad=10):
         libres = [n for n in self.nodos.values() if not n.ocupado and n.tipo == "normal"]
-        seleccionados = random.sample(libres, min(cantidad, len(libres)))
+        seleccionados = random.sample(libres, cantidad)
         for nodo in seleccionados:
             nodo.tipo = "mina"
             nodo.ocupar("Mina")
@@ -108,7 +112,7 @@ class MapManager:
     def generar_vehiculos(self, cantidad_rojo=3, cantidad_azul=3):
         # Vehículos rojos
         for i in range(cantidad_rojo):
-            nodo_inicial = random.choice([self.nodos[n] for n in self.base_roja])
+            nodo_inicial = 73
             auto = Auto(f"AutoR{i+1}", nodo_inicial.id, self.nodos, equipo="rojo")
             nodo_inicial.ocupar(auto)
             self.vehiculos.append(auto)

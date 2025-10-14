@@ -7,13 +7,12 @@ import os
 # CLASE BASE: VEHICULO
 # =====================================================
 class Vehiculo:
-    def __init__(self, id_vehiculo, nodo_inicial, nodos, color, capacidad, viajes_max, equipo="rojo"):
+    def __init__(self, id_vehiculo, nodo_inicial, nodos, capacidad, viajes_max, equipo="rojo"):
         self.id = id_vehiculo
         self.nodos = nodos
         self.nodo_actual = nodo_inicial
         self.pos = list(self.nodos[self.nodo_actual].pos)
 
-        self.color = color
         self.capacidad = capacidad
         self.viajes_restantes = viajes_max
         self.carga = []
@@ -45,10 +44,6 @@ class Vehiculo:
         siguiente_nodo_id = self.camino[0]
         siguiente_nodo = self.nodos[siguiente_nodo_id]
 
-        if siguiente_nodo.ocupado:
-            print(f"{self.id}: Nodo {siguiente_nodo_id} ocupado, recalculando ruta...")
-            self.planificar_ruta(self.destino)
-            return
 
         dx = siguiente_nodo.pos[0] - self.pos[0]
         dy = siguiente_nodo.pos[1] - self.pos[1]
@@ -90,8 +85,7 @@ class Vehiculo:
 # =====================================================
 class Auto(Vehiculo):
     def __init__(self, id_vehiculo, nodo_inicial, nodos, equipo="rojo"):
-        color = (255, 0, 0) if equipo == "rojo" else (0, 0, 255)
-        super().__init__(id_vehiculo, nodo_inicial, nodos, color, capacidad=2, viajes_max=1, equipo=equipo)
+        super().__init__(id_vehiculo, nodo_inicial, nodos, capacidad=2, viajes_max=1, equipo=equipo)
 
         # Cargar imagen relativa al archivo aircraft.py
         imagen_path="ImagenesJuego/autoRojo.png"

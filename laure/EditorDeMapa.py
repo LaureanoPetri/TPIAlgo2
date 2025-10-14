@@ -37,6 +37,27 @@ if os.path.exists("laure/grafo.json"):
 else:
     print("No se encontró grafo.json, empezando desde cero.")
     nodo_id = 0
+if os.path.exists("laure/grafo.json"):
+    with open("laure/grafo.json") as f:
+        datos = json.load(f)
+        posiciones = {k: tuple(v) for k, v in datos["posiciones"].items()}
+        grafo = datos["grafo"]
+        if posiciones:
+            nodo_id = max(int(k) for k in posiciones.keys()) + 1
+        else:
+            nodo_id = 0
+        print(f"Grafo cargado con {len(posiciones)} nodos.")
+
+# 🧹 Asegurar que el grafo cargado sea no dirigido
+for a, vecinos in list(grafo.items()):
+    for b in list(vecinos):
+        if b not in grafo:
+            grafo[b] = []  # Crear entrada vacía si no existe
+        if a not in grafo[b]:
+            grafo[b].append(a)
+print("Grafo convertido a no dirigido correctamente.")
+
+
 # 🕹️ Modo editor: click para agregar nodos o conexiones
 modo_agregar_nodos = True
 
