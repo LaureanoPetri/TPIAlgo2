@@ -3,7 +3,7 @@ import sys
 import os
 import json
 from typing import Dict, Any
-
+from src.pathfinding import*
 from src.map_manager import MapManager
 from src.aircraft import Auto, Moto, Jeep, Camion
 from src.visualization import Visualization
@@ -41,44 +41,55 @@ class GameEngine:
         self.mapa.generar_minas(config.get("num_minas", 10))
         self.mapa.generar_recursos(config.get("num_recursos", 20))
         self.mapa.generar_personas(config.get("num_personas", 10))
-
-        # Vehículos demo
-        self.vehiculos = []
-        base_init = next(iter(self.mapa.base_roja), next(iter(self.mapa.nodos.keys())))
-        self.vehiculos.append(Auto("auto_1", base_init, self.mapa.nodos))
-        #self.vehiculos.append(Moto("moto_1", base_init, self.mapa.nodos))
-        #self.vehiculos.append(Jeep("jeep_1", base_init, self.mapa.nodos))
+        self.mapa.generar_vehiculos()
 
         # Planificar ruta inicial (primer nodo-persona)
-        if self.mapa.personas:
-            persona_node = self.mapa.personas[0].id
-            for v in self.vehiculos:
-                if isinstance(v, Auto):
-                    v.planificar_ruta(persona_node)
-                    break
+        # Planificación inicial automática para todos los vehículos
+        self.objetivos_asignados=[]
+        for lista in [self.mapa.vehiculosRojos, self.mapa.vehiculosAzules]:
+            for v in lista:
+                objetivo = self._buscar_objetivo_disponible(v)
+                if objetivo:
+                    v.planificar_ruta(objetivo)
+                    self.objetivos_asignados.append(objetivo)
 
-        # Visualization
-        self.vis = Visualization(self.screen, self.clock, self.FPS)
+                # Visualization
+                self.vis = Visualization(self.screen, self.clock, self.FPS)
+    def _buscar_objetivo_disponible(self, vehiculo):
+        """Devuelve el ID del objetivo más cercano no asignado."""
+        candidatos = [
+            p.id for p in self.mapa.personas if p.id not in self.objetivos_asignados
+        ] + [
+            r.id for r in self.mapa.recursos if r.id not in self.objetivos_asignados
+        ]
+
+        if not candidatos:
+            return None
+
+        mejor_obj = None
+        menor_dist = float('inf')
+
+        for obj_id in candidatos:
+            camino = find_path(vehiculo.nodo_actual, obj_id, self.mapa.nodos)
+            if camino and len(camino) < menor_dist:
+                mejor_obj = obj_id
+                menor_dist = len(camino)
+
+        return mejor_obj
 
     # -------------------------
     # LOOP PRINCIPAL
     # -------------------------
     def start(self):
         while self.running:
+            # --- EVENTOS BÁSICOS ---
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    nodo_click = self._nodo_mas_cercano(event.pos)
-                    if nodo_click:
-                        for v in self.vehiculos:
-                            if v.estado == "activo":
-                                v.planificar_ruta(nodo_click)
-                                break
-                    self.vehiculos[0].planificar_ruta
-
-
+            # --- ACTUALIZAR LÓGICA Y MOVIMIENTOS ---
             self._update()
+
+            # --- DIBUJAR TODO ---
             self._draw()
             pygame.display.flip()
             self.clock.tick(self.FPS)
@@ -90,14 +101,65 @@ class GameEngine:
     # LÓGICA / ACTUALIZACIONES
     # -------------------------
     def _update(self):
-        for v in self.vehiculos:
+        # --- Actualización vehículos rojos ---
+        for v in self.mapa.vehiculosRojos:
             v.mover()
+
+            # Si el vehículo llegó a destino
+            if v.destino and v.nodo_actual == v.destino:
+                if v.destino in self.objetivos_asignados:
+                    self.objetivos_asignados.remove(v.destino)
+                v.destino = None
+
             nodo_actual = self.mapa.nodos.get(v.nodo_actual)
+
+            # Si hay algo que recoger (persona o recurso)
             if nodo_actual and nodo_actual.tipo in ("persona", "recurso"):
                 v.recoger(nodo_actual)
+
+                # Si recogió una persona, la quitamos del mapa
                 if nodo_actual.tipo == "persona" and nodo_actual.entidad is None:
                     self.mapa.personas = [p for p in self.mapa.personas if p.id != nodo_actual.id]
 
+                # Al recoger algo, reduce capacidad
+                v.capacidad -= 1
+
+                # Si se quedó sin capacidad, vuelve a la base
+                if v.capacidad <= 0:
+                    v.planificar_ruta(v.base_id)
+                    continue  # salta búsqueda de nuevos objetivos hasta que descargue
+
+            # Si todavía tiene capacidad, busca siguiente objetivo disponible
+            if v.capacidad > 0 and (v.destino is None or v.destino == v.nodo_actual):
+                nuevo_obj = self._buscar_objetivo_disponible(v)
+                if nuevo_obj:
+                    v.planificar_ruta(nuevo_obj)
+                    self.objetivos_asignados.append(nuevo_obj)
+
+        # --- Actualización vehículos azules ---
+        for v in self.mapa.vehiculosAzules:
+            v.mover()
+
+            nodo_actual = self.mapa.nodos.get(v.nodo_actual)
+            if nodo_actual and nodo_actual.tipo in ("persona", "recurso"):
+                v.recoger(nodo_actual)
+
+                if nodo_actual.tipo == "persona" and nodo_actual.entidad is None:
+                    self.mapa.personas = [p for p in self.mapa.personas if p.id != nodo_actual.id]
+
+                v.capacidad -= 1
+
+                if v.capacidad <= 0:
+                    v.planificar_ruta(v.base_id)
+                    continue
+
+            if v.capacidad > 0 and (v.destino is None or v.destino == v.nodo_actual):
+                nuevo_obj = self._buscar_objetivo_disponible(v)
+                if nuevo_obj:
+                    v.planificar_ruta(nuevo_obj)
+                    self.objetivos_asignados.append(nuevo_obj)
+
+        # --- Actualizar mapa general ---
         self.mapa.actualizar_estado()
 
     # -------------------------
@@ -105,9 +167,13 @@ class GameEngine:
     # -------------------------
     def _draw(self):
         self.mapa.draw(self.screen)
-        for v in self.vehiculos:
+        for v in self.mapa.vehiculosAzules:
             v.draw(self.screen)
-        self.vis.draw_hud(self.vehiculos)
+        
+        for v in self.mapa.vehiculosRojos:
+            v.draw(self.screen)
+        self.vis.draw_hud(self.mapa.vehiculosRojos)
+        self.vis.draw_hud(self.mapa.vehiculosAzules)
 
     # -------------------------
     # UTIL

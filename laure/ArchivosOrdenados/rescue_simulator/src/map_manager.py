@@ -62,7 +62,8 @@ class MapManager:
         self.minas = []
         self.recursos = []
         self.personas = []
-        self.vehiculos = []
+        self.vehiculosRojos = []
+        self.vehiculosAzules = []
 
         # --- Bases ---
         self.base_roja = config["base_red_nodes"]
@@ -112,17 +113,17 @@ class MapManager:
     def generar_vehiculos(self, cantidad_rojo=3, cantidad_azul=3):
         # Vehículos rojos
         for i in range(cantidad_rojo):
-            nodo_inicial = 73
+            nodo_inicial = self.nodos[73+i]
             auto = Auto(f"AutoR{i+1}", nodo_inicial.id, self.nodos, equipo="rojo")
             nodo_inicial.ocupar(auto)
-            self.vehiculos.append(auto)
+            self.vehiculosRojos.append(auto)
 
         # Vehículos azules
         for i in range(cantidad_azul):
-            nodo_inicial = random.choice([self.nodos[n] for n in self.base_azul])
+            nodo_inicial = self.nodos[219+i]
             auto = Auto(f"AutoA{i+1}", nodo_inicial.id, self.nodos, equipo="azul")
             nodo_inicial.ocupar(auto)
-            self.vehiculos.append(auto)
+            self.vehiculosAzules.append(auto)
 
     # =====================================================
     # DIBUJAR MAPA
@@ -142,9 +143,10 @@ class MapManager:
             pantalla.blit(persona.imagen, (int(persona.pos[0]-35), int(persona.pos[1]-20)))
 
         # Dibujar vehículos
-        for vehiculo in self.vehiculos:
+        for vehiculo in self.vehiculosRojos:
             pantalla.blit(vehiculo.imagen, (int(vehiculo.pos[0]-15), int(vehiculo.pos[1]-15)))
-
+        for vehiculo in self.vehiculosAzules:
+            pantalla.blit(vehiculo.imagen, (int(vehiculo.pos[0]-15), int(vehiculo.pos[1]-15)))
     # =====================================================
     # COLORES DE NODOS
     # =====================================================

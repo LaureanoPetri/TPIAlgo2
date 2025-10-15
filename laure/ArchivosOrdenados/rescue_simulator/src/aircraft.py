@@ -7,11 +7,12 @@ import os
 # CLASE BASE: VEHICULO
 # =====================================================
 class Vehiculo:
-    def __init__(self, id_vehiculo, nodo_inicial, nodos, capacidad, viajes_max, equipo="rojo"):
+    def __init__(self, id_vehiculo, nodo_inicial, nodos, capacidad, viajes_max, equipo):
         self.id = id_vehiculo
         self.nodos = nodos
         self.nodo_actual = nodo_inicial
         self.pos = list(self.nodos[self.nodo_actual].pos)
+        self.base_id=nodo_inicial  # nodo base asignado
 
         self.capacidad = capacidad
         self.viajes_restantes = viajes_max
@@ -84,11 +85,14 @@ class Vehiculo:
 # CLASES ESPECÍFICAS DE VEHÍCULOS
 # =====================================================
 class Auto(Vehiculo):
-    def __init__(self, id_vehiculo, nodo_inicial, nodos, equipo="rojo"):
+    def __init__(self, id_vehiculo, nodo_inicial, nodos, equipo):
         super().__init__(id_vehiculo, nodo_inicial, nodos, capacidad=2, viajes_max=1, equipo=equipo)
 
         # Cargar imagen relativa al archivo aircraft.py
-        imagen_path="ImagenesJuego/autoRojo.png"
+        if equipo=="rojo":
+            imagen_path="ImagenesJuego/autoRojo.png"
+        else:
+            imagen_path="ImagenesJuego/autoAzul.png"
         ruta_completa_imagen = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", imagen_path))
         imagen_original = pygame.image.load(ruta_completa_imagen).convert_alpha()
         self.imagen = pygame.transform.scale(imagen_original, (32, 32))
